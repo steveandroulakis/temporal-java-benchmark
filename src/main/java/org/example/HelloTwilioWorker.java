@@ -23,10 +23,14 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HelloTwilioWorker {
     // Define the task queue name
     static final String TASK_QUEUE = "HelloTwilioTaskQueue";
+
+    // get logger
 
     public static void main(String[] args) {
 
@@ -69,6 +73,7 @@ public class HelloTwilioWorker {
          * Start all the workers registered for a specific task queue.
          * The started workers then start polling for workflows and activities.
          */
+        // log some debug info
         factory.start();
     }
 }

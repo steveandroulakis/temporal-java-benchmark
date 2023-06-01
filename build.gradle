@@ -30,6 +30,9 @@ task startWorker(type: JavaExec) {
 }
 
 task runWorkflows(type: JavaExec) {
+    if (project.hasProperty("numWorkflows")) {
+        systemProperty "numWorkflows", project.getProperty("numWorkflows")
+    }
     mainClass = 'org.example.HelloTwilio'
     classpath = sourceSets.main.runtimeClasspath
 }
