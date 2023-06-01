@@ -1,14 +1,4 @@
-# Money transfer: Java project template
-
-This project can be used as a template to start building your own Temporal Workflow application.
-
-Follow the [Run your first app tutorial](https://docs.temporal.io/docs/java/run-your-first-app-tutorial) to learn more about Temporal Workflows.
-
-This project uses [Snipsync](https://github.com/temporalio/snipsync) comment wrappers to automatically keep code snippets up to date within our documentation.
-
-## How to use the template
-
-To use the template, either download it as a zip file or click "Use Template" to make a copy of it in your own Github account.
+# Hello Twilio
 
 ## Build the project
 
