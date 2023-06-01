@@ -1,4 +1,4 @@
-# Money transfer: Java project template
+# Hello Twilio
 
 This project can be used as a template to start building your own Temporal Workflow application.
 
