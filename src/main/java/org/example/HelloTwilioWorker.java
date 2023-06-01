@@ -21,10 +21,13 @@ package org.example;
 
 import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
+import io.temporal.serviceclient.WorkflowServiceStubsOptions;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.temporal.serviceclient.SimpleSslContextBuilder;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
 
 public class HelloTwilioWorker {
     // Define the task queue name
@@ -34,8 +37,31 @@ public class HelloTwilioWorker {
 
     public static void main(String[] args) {
 
-        // Get a Workflow service stub.
-        WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
+        WorkflowServiceStubs service = null;
+        if (System.getenv("TEMPORAL_MTLS_TLS_KEY") == null || System.getenv("TEMPORAL_MTLS_TLS_KEY").isEmpty()) {
+            service = WorkflowServiceStubs.newLocalServiceStubs();
+        } else {
+            try {
+                InputStream clientCert = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_CERT"));
+                // PKCS8 client key, which should look like:
+                // -----BEGIN PRIVATE KEY-----
+                // ...
+                // -----END PRIVATE KEY-----
+                InputStream clientKey = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_KEY"));
+                // For temporal cloud this would likely be ${namespace}.tmprl.cloud:7233
+                String targetEndpoint = System.getenv("TEMPORAL_HOST_URL");
+                // Create SSL enabled client by passing SslContext, created by SimpleSslContextBuilder.
+                service =
+                    WorkflowServiceStubs.newServiceStubs(
+                        WorkflowServiceStubsOptions.newBuilder()
+                            .setSslContext(SimpleSslContextBuilder.forPKCS8(clientCert, clientKey).build())
+                            .setTarget(targetEndpoint)
+                            .build()); 
+            
+            } catch (IOException e) {
+                System.err.println("Error loading certificates: " + e.getMessage());
+            }  
+        }
 
         /*
          * Get a Workflow service client which can be used to start, Signal, and Query

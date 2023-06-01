@@ -6,6 +6,7 @@ import io.temporal.activity.ActivityOptions;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.serviceclient.WorkflowServiceStubs;
+import io.temporal.serviceclient.WorkflowServiceStubsOptions;
 import io.temporal.workflow.Workflow;
 import io.temporal.workflow.WorkflowInterface;
 import io.temporal.workflow.WorkflowMethod;
@@ -18,6 +19,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import io.temporal.serviceclient.SimpleSslContextBuilder;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,8 +93,31 @@ public class HelloTwilio {
     public static void main(String[] args) {
         int numWorkflows = -1;
 
-        // Get a Workflow service stub.
-        WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
+        WorkflowServiceStubs service = null;
+        if (System.getenv("TEMPORAL_MTLS_TLS_KEY") == null || System.getenv("TEMPORAL_MTLS_TLS_KEY").isEmpty()) {
+            service = WorkflowServiceStubs.newLocalServiceStubs();
+        } else {
+            try {
+                InputStream clientCert = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_CERT"));
+                // PKCS8 client key, which should look like:
+                // -----BEGIN PRIVATE KEY-----
+                // ...
+                // -----END PRIVATE KEY-----
+                InputStream clientKey = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_KEY"));
+                // For temporal cloud this would likely be ${namespace}.tmprl.cloud:7233
+                String targetEndpoint = System.getenv("TEMPORAL_HOST_URL");
+                // Create SSL enabled client by passing SslContext, created by SimpleSslContextBuilder.
+                service =
+                    WorkflowServiceStubs.newServiceStubs(
+                        WorkflowServiceStubsOptions.newBuilder()
+                            .setSslContext(SimpleSslContextBuilder.forPKCS8(clientCert, clientKey).build())
+                            .setTarget(targetEndpoint)
+                            .build()); 
+            
+            } catch (IOException e) {
+                System.err.println("Error loading certificates: " + e.getMessage());
+            }  
+        }
 
         // Number of workflows to run in parallel.
         String numWorkflowsString = System.getProperty("numWorkflows");
