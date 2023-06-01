@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    javaSDKVersion = '1.18.1'
+}
+
+dependencies {
+    // These dependencies are used by the application.
+    implementation "io.temporal:temporal-sdk:$javaSDKVersion"
+    implementation "ch.qos.logback:logback-classic:1.2.11"
+
+    // Use JUnit test framework
+    testImplementation "io.temporal:temporal-testing:$javaSDKVersion"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:5.1.1"
+}
+
+task startWorker(type: JavaExec) {
+    mainClass = 'org.example.HelloTwilioWorker'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task runWorkflows(type: JavaExec) {
+    mainClass = 'org.example.HelloTwilio'
+    classpath = sourceSets.main.runtimeClasspath
+}
