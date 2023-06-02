@@ -25,7 +25,7 @@ dependencies {
 }
 
 task startWorker(type: JavaExec) {
-    mainClass = 'org.example.HelloTwilioWorker'
+    mainClass = 'org.example.BenchWorker'
     classpath = sourceSets.main.runtimeClasspath
 }
 
@@ -33,6 +33,6 @@ task runWorkflows(type: JavaExec) {
     if (project.hasProperty("numWorkflows")) {
         systemProperty "numWorkflows", project.getProperty("numWorkflows")
     }
-    mainClass = 'org.example.HelloTwilio'
+    mainClass = 'org.example.BenchWorkflow'
     classpath = sourceSets.main.runtimeClasspath
 }

@@ -24,17 +24,16 @@ import io.temporal.serviceclient.SimpleSslContextBuilder;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HelloTwilio {
-    // Define the task queue name
-    static final String TASK_QUEUE = "HelloTwilioTaskQueue";
-    ;
+public class BenchWorkflow {
+    static final String TASK_QUEUE = "BenchTaskQueue";
 
     private static final Logger log = LoggerFactory.getLogger(SampleActivityImpl.class);
-    private static final Logger logWorkflow = LoggerFactory.getLogger(HelloTwilioWorker.class);
+    private static final Logger logWorkflow = LoggerFactory.getLogger(BenchWorker.class);
 
     @WorkflowInterface
     public interface ComposerWorkflow {
@@ -86,6 +85,11 @@ public class HelloTwilio {
         @Override
         public Integer execute(final Integer input) {
             log.info("Executing http call " + input);
+
+            // Send HTTP Request
+            BenchWebService webService = new BenchWebService();
+            HttpURLConnection conn = webService.GetHttpClient();
+            webService.SendHttpRequest(conn);
 
             return input + 1;
         }
@@ -153,7 +157,7 @@ public class HelloTwilio {
             // Each task is a new Runnable.
             Runnable task = () -> {
                 // Define unique workflow id.
-                String WORKFLOW_ID = "HelloTwilioWorkflow-" + UUID.randomUUID();
+                String WORKFLOW_ID = "BenchWorkflow-" + UUID.randomUUID();
 
                 // Create the workflow client stub.
                 ComposerWorkflow workflow = client.newWorkflowStub(
