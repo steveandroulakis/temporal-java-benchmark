@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: temporal-java-benchmark-service
+  namespace: temporal-java-benchmark
+  labels:
+    app: temporal-java-benchmark
+spec:
+  ports:
+    - name: metrics
+      port: 9090
+      protocol: TCP
+      targetPort: metrics
+  type: ClusterIP
+  selector:
+    app: temporal-java-benchmark
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+   name: temporal-java-benchmark-servicemonitor
+   namespace: temporal-java-benchmark
+spec:
+   namespaceSelector:
+      matchNames:
+      - temporal-java-benchmark
+   selector:
+      matchLabels:
+         app: temporal-java-benchmark
+   endpoints:
+      - port: metrics

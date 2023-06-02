@@ -22,6 +22,8 @@ dependencies {
     testImplementation "io.temporal:temporal-testing:$javaSDKVersion"
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:5.1.1"
+
+    implementation "io.micrometer:micrometer-registry-prometheus"
 }
 
 task startWorker(type: JavaExec) {

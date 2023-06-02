@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-java-benchmark
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal-java-benchmark
+  template:
+    metadata:
+      labels:
+        app: temporal-java-benchmark
+        namespace: temporal-java-benchmark
+    spec:
+      containers:
+        - name: worker-workflow
+          image: steveandroulakis/temporal-java-benchmark:latest
+          imagePullPolicy: Always
+          env:
+            - name: TASK
+              value: startWorker
+            - name: NUM_WORKFLOWS
+              value: "1"
+            - name: TEMPORAL_HOST_URL
+              value: temporal-server-frontend-headless.stevea-temporal-server:7233
+            - name: TEMPORAL_PROMETHEUS_ENABLED
+              value: "true"
+          ports:
+            - name: metrics
+              containerPort: 9090
