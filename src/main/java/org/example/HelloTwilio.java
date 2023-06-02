@@ -4,6 +4,7 @@ import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowClientOptions;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.serviceclient.WorkflowServiceStubsOptions;
@@ -138,8 +139,14 @@ public class HelloTwilio {
         // Create a list to hold the Future objects.
         List<Future<?>> futures = new ArrayList<>();
 
+        String targetNamespace = System.getenv("TEMPORAL_NAMESPACE");
+        if (targetNamespace == null || targetNamespace.isEmpty()) {
+            targetNamespace = "default";
+        }
+
         // Get a Workflow service client.
-                WorkflowClient client = WorkflowClient.newInstance(service);
+        WorkflowClient client = WorkflowClient.newInstance(service,
+                WorkflowClientOptions.newBuilder().setNamespace(targetNamespace).build());
 
         // Start NUM_WORKFLOWS workflows in parallel.
         for (int i = 0; i < numWorkflows; i++) {

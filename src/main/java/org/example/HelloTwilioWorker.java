@@ -20,6 +20,7 @@
 package org.example;
 
 import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowClientOptions;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.serviceclient.WorkflowServiceStubsOptions;
 import io.temporal.worker.Worker;
@@ -63,11 +64,17 @@ public class HelloTwilioWorker {
             }  
         }
 
+        String targetNamespace = System.getenv("TEMPORAL_NAMESPACE");
+        if (targetNamespace == null || targetNamespace.isEmpty()) {
+            targetNamespace = "default";
+        }
+
         /*
          * Get a Workflow service client which can be used to start, Signal, and Query
          * Workflow Executions.
          */
-        WorkflowClient client = WorkflowClient.newInstance(service);
+        WorkflowClient client = WorkflowClient.newInstance(service,
+                WorkflowClientOptions.newBuilder().setNamespace(targetNamespace).build());
 
         /*
          * Define the workflow factory. It is used to create workflow workers for a
