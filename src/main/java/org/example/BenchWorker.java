@@ -30,11 +30,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
-public class HelloTwilioWorker {
+public class BenchWorker {
     // Define the task queue name
-    static final String TASK_QUEUE = "HelloTwilioTaskQueue";
-
-    // get logger
+    static final String TASK_QUEUE = "BenchTaskQueue";
 
     public static void main(String[] args) {
 
@@ -54,14 +52,8 @@ public class HelloTwilioWorker {
         } else {
             try {
                 InputStream clientCert = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_CERT"));
-                // PKCS8 client key, which should look like:
-                // -----BEGIN PRIVATE KEY-----
-                // ...
-                // -----END PRIVATE KEY-----
                 InputStream clientKey = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_KEY"));
-                // For temporal cloud this would likely be ${namespace}.tmprl.cloud:7233
 
-                // Create SSL enabled client by passing SslContext, created by SimpleSslContextBuilder.
                 service =
                     WorkflowServiceStubs.newServiceStubs(
                         WorkflowServiceStubsOptions.newBuilder()
@@ -79,44 +71,15 @@ public class HelloTwilioWorker {
             targetNamespace = "default";
         }
 
-        /*
-         * Get a Workflow service client which can be used to start, Signal, and Query
-         * Workflow Executions.
-         */
         WorkflowClient client = WorkflowClient.newInstance(service,
                 WorkflowClientOptions.newBuilder().setNamespace(targetNamespace).build());
 
-        /*
-         * Define the workflow factory. It is used to create workflow workers for a
-         * specific task queue.
-         */
         WorkerFactory factory = WorkerFactory.newInstance(client);
-
-        /*
-         * Define the workflow worker. Workflow workers listen to a defined task queue
-         * and process
-         * workflows and activities.
-         */
         Worker worker = factory.newWorker(TASK_QUEUE);
 
-        /*
-         * Register our workflow implementation with the worker.
-         * Workflow implementations must be known to the worker at runtime in
-         * order to dispatch workflow tasks.
-         */
-        worker.registerWorkflowImplementationTypes(HelloTwilio.ComposerWorkflowImpl.class);
+        worker.registerWorkflowImplementationTypes(BenchWorkflow.ComposerWorkflowImpl.class);
+        worker.registerActivitiesImplementations(new BenchWorkflow.SampleActivityImpl());
 
-        /**
-         * Register our Activity Types with the Worker. Since Activities are stateless and thread-safe,
-         * the Activity Type is a shared instance.
-         */
-        worker.registerActivitiesImplementations(new HelloTwilio.SampleActivityImpl());
-
-        /*
-         * Start all the workers registered for a specific task queue.
-         * The started workers then start polling for workflows and activities.
-         */
-        // log some debug info
         factory.start();
     }
 }
