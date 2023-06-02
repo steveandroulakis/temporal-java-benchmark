@@ -38,9 +38,19 @@ public class HelloTwilioWorker {
 
     public static void main(String[] args) {
 
+        String targetEndpoint = System.getenv("TEMPORAL_HOST_URL");
+        // if TEMPORAL_HOST_URL is not set then use 127.0.0.1:7233
+        if (targetEndpoint == null || targetEndpoint.isEmpty()) {
+            targetEndpoint = "127.0.0.1:7233";
+        }
+
         WorkflowServiceStubs service = null;
         if (System.getenv("TEMPORAL_MTLS_TLS_KEY") == null || System.getenv("TEMPORAL_MTLS_TLS_KEY").isEmpty()) {
-            service = WorkflowServiceStubs.newLocalServiceStubs();
+            service =
+                    WorkflowServiceStubs.newServiceStubs(
+                            WorkflowServiceStubsOptions.newBuilder()
+                                    .setTarget(targetEndpoint)
+                                    .build());
         } else {
             try {
                 InputStream clientCert = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_CERT"));
@@ -50,7 +60,7 @@ public class HelloTwilioWorker {
                 // -----END PRIVATE KEY-----
                 InputStream clientKey = new FileInputStream(System.getenv("TEMPORAL_MTLS_TLS_KEY"));
                 // For temporal cloud this would likely be ${namespace}.tmprl.cloud:7233
-                String targetEndpoint = System.getenv("TEMPORAL_HOST_URL");
+
                 // Create SSL enabled client by passing SslContext, created by SimpleSslContextBuilder.
                 service =
                     WorkflowServiceStubs.newServiceStubs(
