@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: temporal-java-benchmark
+  name: temporal-java-benchmark-caller
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: temporal-java-benchmark
+      app: temporal-java-benchmark-caller
   template:
     metadata:
       labels:
-        app: temporal-java-benchmark
+        app: temporal-java-benchmark-caller
         namespace: temporal-java-benchmark
     spec:
       containers:
@@ -19,9 +19,9 @@ spec:
           imagePullPolicy: Always
           env:
             - name: TASK
-              value: startWorker
+              value: runWorkflow
             - name: NUM_WORKFLOWS
-              value: "1"
+              value: "20"
             - name: TEMPORAL_HOST_URL
               value: cloud.192.168.20.114.nip.io
             - name: TEMPORAL_PROMETHEUS_ENABLED
