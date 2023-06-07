@@ -1,4 +1,4 @@
-# Hello Twilio
+# Temporal Java Benchmark
 
 ## Build the project
 
